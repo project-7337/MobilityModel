@@ -31,9 +31,7 @@ def get_sarimax(trend,exog_train,exog_test,max_range=3,seasonal_factor=12):
     p = d = q = range(0, max_range)
     pdq = list(itertools.product(p, d, q))
 
-    #seasonal parameter = seasonal_factor
     seasonal_pdq = [(x[0], x[1], x[2], seasonal_factor) for x in list(itertools.product(p, d, q))]
-#     print(pdq,seasonal_pdq)
     
     min_rmse=9999999
     min_model_mape = 9999999
@@ -43,19 +41,14 @@ def get_sarimax(trend,exog_train,exog_test,max_range=3,seasonal_factor=12):
     result_param_seasonal=-1
     for i in [(1,1,1)]:#range(0,len(pdq)):
         for j in [(1,0,0,12)]:#range(0,len(seasonal_pdq)):
-#             try:
-
             param = pdq[i]
             param_seasonal = seasonal_pdq[j]
             mod = sm.tsa.statespace.SARIMAX(train,exog=exog_train,order=param,seasonal_order=param_seasonal,enforce_stationarity=False,enforce_invertibility=False)
             results = mod.fit()
             aic_value = results.aic
-#                 if math.isnan(temp) or math.isinf(temp):
-#                     temp = 999.99
             pred = results.predict(len(train),len(trend)-1,exog = exog_test)
             rmse = scoring_rmse(pred,test)
             mape = scoring_mape(pred,test)
-#                 print(pred,rmse,mape)
             if rmse < min_rmse:
                 min_rmse = rmse
                 min_model_aic = aic_value
