@@ -114,8 +114,9 @@ def scoring_mape(pred,test):
 def predict_data(country, region):
     cdata= pd.read_csv('finalDataset.csv', index_col=0)
     cdata['date'] =  pd.to_datetime(cdata['date'], infer_datetime_format=True)
-    cdata = cdata.set_index('date')
     start_date = cdata['date'].iloc[-1] + pd.DateOffset(1)
+    cdata = cdata.set_index('date')
+    
 
     data_country = country
     data_sub_region = region
@@ -142,9 +143,11 @@ def predict_data(country, region):
     #replace exog in last line with exog_df and 10 by 30
 
     forecast_drive = fcast_sarimax(model,exog_df,30)
-    forecast_drive[date] = pd.date_range(start_date, periods = 30, freq ='H')
-    forecast_drive.to_json()
-    return forecast_drive
+    datelist_country = pd.date_range(start_date, periods=30).tolist()
+    final_df_country = pd.DataFrame(list(zip(forecast_drive, datelist)), 
+               columns =['forecast', 'date'])
+    final_df_country.to_json()
+    return final_df_country
 
 @app.route("/<string:country>/<string:region>", methods=['GET'])
 def runModel(country, region):
